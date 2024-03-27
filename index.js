@@ -3,6 +3,8 @@ let cards = [];
 let firstCard, secondCard;
 let lockBoard = false;
 let score = 0;
+const giveUpButton = document.querySelector(".give-up-button");
+giveUpButton.addEventListener("click", giveUp);
 
 document.querySelector(".score").textContent = score;
 
@@ -14,6 +16,7 @@ fetch("./data/cards.json")
     generateCards();
   });
 
+
 function shuffleCards() {
   let currentIndex = cards.length,
     randomIndex,
@@ -24,22 +27,6 @@ function shuffleCards() {
     temporaryValue = cards[currentIndex];
     cards[currentIndex] = cards[randomIndex];
     cards[randomIndex] = temporaryValue;
-  }
-}
-
-function generateCards() {
-  for (let card of cards) {
-    const cardElement = document.createElement("div");
-    cardElement.classList.add("card");
-    cardElement.setAttribute("data-name", card.name);
-    cardElement.innerHTML = `
-      <div class="front">
-        <img class="front-image" src=${card.image} />
-      </div>
-      <div class="back"></div>
-    `;
-    gridContainer.appendChild(cardElement);
-    cardElement.addEventListener("click", flipCard);
   }
 }
 
@@ -62,17 +49,29 @@ function flipCard() {
   checkForMatch();
 }
 
+function generateCards() {
+  for (let card of cards) {
+    const cardElement = document.createElement("div");
+    cardElement.classList.add("card");
+    cardElement.setAttribute("data-name", card.name);
+
+    cardElement.innerHTML = `
+      <div class="front">
+        <img class="front-image" src=${card.image} />
+      </div>
+      <div class="back"></div>
+    `;
+
+    gridContainer.appendChild(cardElement);
+    cardElement.addEventListener("click", flipCard);
+
+  }
+}
+
 function checkForMatch() {
   let isMatch = firstCard.dataset.name === secondCard.dataset.name;
 
   isMatch ? disableCards() : unflipCards();
-}
-
-function disableCards() {
-  firstCard.removeEventListener("click", flipCard);
-  secondCard.removeEventListener("click", flipCard);
-
-  resetBoard();
 }
 
 function unflipCards() {
@@ -83,10 +82,11 @@ function unflipCards() {
   }, 1000);
 }
 
-function resetBoard() {
-  firstCard = null;
-  secondCard = null;
-  lockBoard = false;
+function disableCards() {
+  firstCard.removeEventListener("click", flipCard);
+  secondCard.removeEventListener("click", flipCard);
+
+  resetBoard();
 }
 
 function restart() {
@@ -96,4 +96,19 @@ function restart() {
   document.querySelector(".score").textContent = score;
   gridContainer.innerHTML = "";
   generateCards();
+}
+
+function resetBoard() {
+  firstCard = null;
+  secondCard = null;
+  lockBoard = false;
+}
+
+function giveUp() {
+  if (lockBoard) return;
+
+  const allCards = document.querySelectorAll(".card");
+  allCards.forEach(card => {
+    card.classList.add("flipped");
+  });
 }
